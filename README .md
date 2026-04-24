@@ -107,8 +107,7 @@ sudo ./engine stop alpha
 # Demo with Screenshots
 
 ## 1. Multi-container supervision
-https://github.com/RamyaRamesh04/OS-Jackfruit/blob/main/images/images/1.png
-![Alt text](images/images/your-image-name.png)
+![Screenshot](images/images/1.png)
 
 ![Screenshot](images/2.png)
 
