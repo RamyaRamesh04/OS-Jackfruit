@@ -108,7 +108,7 @@ sudo ./engine stop alpha
 
 ## 1. Multi-container supervision
 
-![Screenshot](images/1.png)
+![Alt text](images/images/your-image-name.png)
 
 ![Screenshot](images/2.png)
 
