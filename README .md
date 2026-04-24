@@ -109,66 +109,65 @@ sudo ./engine stop alpha
 ## 1. Multi-container supervision
 ![Screenshot](images/images/1.png)
 
-![Screenshot](images/2.png)
+![Screenshot](images/images/2.png)
 
 Two containers (**alpha**, **beta**) are running concurrently under one supervisor. **Supervisor [Terminal 1]** shows that producer threads have started for each container. **[Terminal 2]** shows that start commands have returned with host PIDs.
 
 ## 2. Metadata tracking
 
-![Screenshot](images/3.png)
+![Screenshot](images/images/3.png)
 
 **`engine ps`** output shows both containers being tracked with **host PID**, **state=running**, configured memory limits (**soft/hard in MiB**), **exit code 0**, and **start time**.
 
 ## 3. Bounded-buffer logging
 
-![Screenshot](images/4.png)
+![Screenshot](images/images/4.png)
 
-![Screenshot](images/5.png)
+![Screenshot](images/images/5.png)
 
 **`engine logs alpha`** displays the output of `cpu_hog` collected through the bounded-buffer pipeline. **Supervisor [Terminal 1]** shows the producer thread reading from pipe and logger consumer writing to file. The lines are `cpu_hog`'s stdout printed once a second.
 
 ## 4. CLI and IPC
 
-![Screenshot](images/6.png)
+![Screenshot](images/images/6.png)
 
-![Screenshot](images/7.png)
+![Screenshot](images/images/7.png)
 
-![Screenshot](images/8.png)
+![Screenshot](images/images/8.png)
 
 **`engine stop alpha`** sends `CMD_STOP` over the UNIX domain socket, and the supervisor sets **`stop_requested=1`** then sends `SIGTERM`. **`ps`** confirms **`state=stopped`**. (`alpha` shows `stopped`, not `killed`, because `stop_requested` was set before the signal). Producer thread is joined cleanly in T1.
 
 ## 5. Soft-limit warning
 
-![Screenshot](images/9.png)
-
-![Screenshot](images/10.png)
+![Screenshot](images/images/9.png)
+![Screenshot](images/images/10.png)
 
 **`dmesg`** shows **SOFT LIMIT** event from kernel module for the `container=memtest`. RSS (in bytes) has exceeded the **16 MiB soft limit**. This is a one-time warning logged via `printk(KERN_WARNING)`, and the **`soft_warned`** flag is set to `1` after this.
 
 ## 6. Hard-limit enforcement
 
-![Screenshot](images/11.png)
+![Screenshot](images/images/11.png)
 
-![Screenshot](images/12.png)
+![Screenshot](images/images/12.png)
 
-![Screenshot](images/13.png)
+![Screenshot](images/images/13.png)
 
 
 **Hard-limit enforcement**: the kernel module had sent `SIGKILL` when `memtest` RSS exceeded **32 MiB**. **`dmesg` [Terminal 3]** shows the **HARD LIMIT** event. **`engine ps` [Terminal 2]** shows the **`state=hard_limit_killed`** (distinct from `stopped`), and hence proves the use of **`stop_requested=0`** path.
 
 ## 7. Scheduling experiment
 
-![Screenshot](images/14.png)
+![Screenshot](images/images/14.png)
 
-![Screenshot](images/15.png)
+![Screenshot](images/images/15.png)
 
 **`hog0` (nice=0)** logged **29 lines** vs **`hog15` (nice=+15)** logged **5 lines** over the same **30 second** wall-clock period. Ratio ≈ **5.8:1**. Both say `duration=30` because `cpu_hog` counts wall-clock seconds. But `hog0` logged 29 "alive" lines (one per second of wall time it was actually running) while `hog15` logged only 5 because it received far less CPU time per wall-clock second.
 
 ## 8. Clean teardown
 
-![Screenshot](images/16.png)
+![Screenshot](images/images/16.png)
 
-![Screenshot](images/17.png)
+![Screenshot](images/images/17.png)
 
 **Supervisor [Terminal 1]** logs joined producer threads and clean exit. No zombie processes are recorded **[Terminal 2 top]**. **`dmesg`** confirms that the module has unloaded **[Terminal 2 middle]**. Socket file has also been removed **[T2 bottom]**. All heap, FDs, and kernel list entries have been freed.
 
